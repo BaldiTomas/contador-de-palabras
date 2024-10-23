@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contador de Palabras</title>
+</head>
+<body>
+    <h1>Sube hasta 5 archivos .txt para contar las palabras</h1>
+    <form id="uploadForm">
+        <input type="file" id="fileInput" accept=".txt" multiple required>
+        <button type="submit">Contar Palabras</button>
+    </form>
+    <p id="result"></p>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            let fileInput = document.getElementById('fileInput');
+            let files = fileInput.files;
+
+            if (files.length > 5) {
+                document.getElementById('result').textContent = "Solo puedes subir hasta 5 archivos.";
+                return;
+            }
+
+            let formData = new FormData();
+            for (let i = 0; i < files.length; i++) {
+                formData.append('files', files[i]);
+            }
+
+            // URL de tu backend en Heroku
+            let backendUrl = 'https://<tu-app>.herokuapp.com/count-words';
+
+            fetch(backendUrl, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                let resultText = 'Resultados:\n';
+                for (let file in data) {
+                    resultText += `${file}: ${data[file]} palabras\n`;
+                }
+                document.getElementById('result').textContent = resultText;
+            })
+            .catch(error => {
+                document.getElementById('result').textContent = 'Hubo un error al procesar los archivos.';
+                console.error(error);
+            });
+        });
+    </script>
+</body>
+</html>
